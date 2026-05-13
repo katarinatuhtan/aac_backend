@@ -24,6 +24,18 @@ const eventSchema = new mongoose.Schema({
     type: Number,
     required: true,
     min: 1
+  },
+  catering: {
+    type: Boolean,
+    default: false
+  },
+  collaborators: {
+    type: Boolean,
+    default: false
+  },
+  duration: {
+    type: Number,
+    min: 0
   }
 }, {
   timestamps: true

@@ -14,7 +14,6 @@ const requestSchema = new mongoose.Schema({
   status: {
     type: String,
     required: true,
-    enum: ['zaprimljeno', 'u_obradi', 'zavrseno', 'odbijeno'],
     default: 'zaprimljeno'
   }
 //   user_id: {

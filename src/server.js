@@ -14,14 +14,12 @@ app.use(express.json());
 const certificateRoutes = require('./routes/certificates');
 const contentRoutes = require('./routes/contents');
 const eventRoutes = require('./routes/events');
-const registrationRoutes = require('./routes/registrations');
 const requestRoutes = require('./routes/requests');
 const userRoutes = require('./routes/users');
 
 app.use('/api/certificates', certificateRoutes);
 app.use('/api/contents', contentRoutes);
 app.use('/api/events', eventRoutes);
-app.use('/api/registrations', registrationRoutes);
 app.use('/api/requests', requestRoutes);
 app.use('/api/users', userRoutes);
 

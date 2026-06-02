@@ -27,6 +27,9 @@ router.post('/login', async (req, res) => {
 // CREATE
 router.post('/', async (req, res) => {
     try {
+        if (req.body.role === 'admin') {
+            return res.status(400).json({ message: 'Nije moguće kreirati korisnika s ulogom admin.' });
+        }
         const user = new User(req.body);
         await user.save();
         res.status(201).json(user);

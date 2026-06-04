@@ -36,7 +36,14 @@ const eventSchema = new mongoose.Schema({
   duration: {
     type: Number,
     min: 0
-  }
+  }, registeredUsers: [
+    {
+      _id: { type: String, required: true },
+      name: { type: String, required: true },
+      last_name: { type: String, required: true },
+      email: { type: String, required: true }
+    }
+  ]
 }, {
   timestamps: true
 });

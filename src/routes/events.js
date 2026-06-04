@@ -59,4 +59,47 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+// REGISTER
+router.post('/:id/register', async (req, res) => {
+    try {
+        const event = await Event.findById(req.params.id);
+        if (!event) return res.status(404).json({ message: 'Event not found' });
+
+        const { _id, name, last_name, email } = req.body;
+
+        const alreadyRegistered = event.registeredUsers.some(u => u._id === _id);
+        if (alreadyRegistered) {
+            return res.status(400).json({ message: 'User already registered' });
+        }
+
+        if (event.registeredUsers.length >= event.capacity) {
+            return res.status(400).json({ message: 'Event is full' });
+        }
+
+        event.registeredUsers.push({ _id, name, last_name, email });
+        await event.save();
+
+        res.json(event);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// UNREGISTER
+router.delete('/:id/register/:userId', async (req, res) => {
+    try {
+        const event = await Event.findById(req.params.id);
+        if (!event) return res.status(404).json({ message: 'Event not found' });
+
+        event.registeredUsers = event.registeredUsers.filter(
+            u => u._id !== req.params.userId
+        );
+
+        await event.save();
+        res.json(event);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 module.exports = router;

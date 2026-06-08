@@ -107,49 +107,49 @@ router.delete('/:id/register/:userId', async (req, res) => {
 
 // CONFIRM — slanje potvrda svim prijavljenim
 router.post('/:id/confirm', async (req, res) => {
-  try {
-    const event = await Event.findById(req.params.id);
-    if (!event) return res.status(404).json({ message: 'Event not found' });
-
-    if (!event.registeredUsers || event.registeredUsers.length === 0) {
-      return res.status(400).json({ message: 'Nema prijavljenih korisnika.' });
-    }
-
-    const results = [];
-
-    for (const user of event.registeredUsers) {
-      try {
-        const pdfBuffer = await generateConfirmationPdf(user, event);
-
-        await transporter.sendMail({
-          from: `"AAC Sustav" <${process.env.MAIL_USER}>`,
-          to: user.email,
-          subject: `Potvrda sudjelovanja – ${event.name}`,
-          html: `
-            <p>Poštovani/a ${user.name} ${user.last_name},</p>
-            <p>U privitku se nalazi vaša potvrda sudjelovanja za događaj <strong>${event.name}</strong>.</p>
-            <br>
-            <p>AAC Sustav</p>
-          `,
-          attachments: [
-            {
+    try {
+      const event = await Event.findById(req.params.id);
+      if (!event) return res.status(404).json({ message: 'Event not found' });
+  
+      if (!event.registeredUsers || event.registeredUsers.length === 0) {
+        return res.status(400).json({ message: 'Nema prijavljenih korisnika.' });
+      }
+  
+      const results = [];
+  
+      for (const user of event.registeredUsers) {
+        try {
+          const pdfBuffer = await generateConfirmationPdf(user, event);
+          await transporter.sendMail({
+            from: `"AAC Sustav" <${process.env.MAIL_USER}>`,
+            to: user.email,
+            subject: `Potvrda sudjelovanja – ${event.name}`,
+            html: `
+              <p>Poštovani/a ${user.name} ${user.last_name},</p>
+              <p>U privitku se nalazi vaša potvrda sudjelovanja za događaj <strong>${event.name}</strong>.</p>
+              <br>
+              <p>AAC Sustav</p>
+            `,
+            attachments: [{
               filename: `potvrda_${event.name.replace(/\s+/g, '_')}_${user.last_name}.pdf`,
               content: pdfBuffer,
               contentType: 'application/pdf'
-            }
-          ]
-        });
-
-        results.push({ user: user.email, status: 'sent' });
-      } catch (err) {
-        results.push({ user: user.email, status: 'failed', error: err.message });
+            }]
+          });
+          results.push({ user: user.email, status: 'sent' });
+        } catch (err) {
+          results.push({ user: user.email, status: 'failed', error: err.message });
+        }
       }
+  
+      // Postavi status na 'finished' nakon slanja potvrda
+      event.status = 'finished';
+      await event.save();
+  
+      res.json({ message: 'Potvrde poslane.', results, event });
+    } catch (err) {
+      res.status(500).json({ message: err.message });
     }
-
-    res.json({ message: 'Potvrde poslane.', results });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
+  });
 
 module.exports = router;

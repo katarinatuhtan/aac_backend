@@ -105,4 +105,24 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+// CHANGE PASSWORD
+router.post('/:id/change-password', async (req, res) => {
+    try {
+      const user = await User.findById(req.params.id);
+      if (!user) return res.status(404).json({ message: 'User not found' });
+  
+      const { currentPassword, newPassword } = req.body;
+  
+      const ok = await user.comparePassword(currentPassword);
+      if (!ok) return res.status(401).json({ message: 'Trenutna lozinka nije ispravna.' });
+  
+      user.password = newPassword;
+      await user.save();
+  
+      res.json({ message: 'Lozinka uspješno promijenjena.' });
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
 module.exports = router;

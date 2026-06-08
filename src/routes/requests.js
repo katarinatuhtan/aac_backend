@@ -16,12 +16,12 @@ router.post('/', async (req, res) => {
 // READ ALL
 router.get('/', async (req, res) => {
     try {
-        const requests = await Request.find();
-        res.json(requests);
+      const requests = await Request.find().populate('user_id', 'name last_name email');
+      res.json(requests);
     } catch (err) {
-        res.status(500).json({ message: err.message });
+      res.status(500).json({ message: err.message });
     }
-});
+  });
 
 // READ ONE
 router.get('/:id', async (req, res) => {
@@ -33,6 +33,17 @@ router.get('/:id', async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 });
+
+// READ BY USER
+router.get('/user/:userId', async (req, res) => {
+    try {
+      const requests = await Request.find({ user_id: req.params.userId })
+        .populate('user_id', 'name last_name email');
+      res.json(requests);
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
+  });
 
 // UPDATE
 router.put('/:id', async (req, res) => {

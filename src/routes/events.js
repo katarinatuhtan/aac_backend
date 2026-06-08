@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Event = require('../models/Event');
+const transporter = require('../helpers/mailer');
+const generateConfirmationPdf = require('../helpers/generateConfirmationPdf');
 
 // CREATE
 router.post('/', async (req, res) => {
@@ -100,6 +102,54 @@ router.delete('/:id/register/:userId', async (req, res) => {
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
+});
+
+
+// CONFIRM — slanje potvrda svim prijavljenim
+router.post('/:id/confirm', async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
+    if (!event) return res.status(404).json({ message: 'Event not found' });
+
+    if (!event.registeredUsers || event.registeredUsers.length === 0) {
+      return res.status(400).json({ message: 'Nema prijavljenih korisnika.' });
+    }
+
+    const results = [];
+
+    for (const user of event.registeredUsers) {
+      try {
+        const pdfBuffer = await generateConfirmationPdf(user, event);
+
+        await transporter.sendMail({
+          from: `"AAC Sustav" <${process.env.MAIL_USER}>`,
+          to: user.email,
+          subject: `Potvrda sudjelovanja – ${event.name}`,
+          html: `
+            <p>Poštovani/a ${user.name} ${user.last_name},</p>
+            <p>U privitku se nalazi vaša potvrda sudjelovanja za događaj <strong>${event.name}</strong>.</p>
+            <br>
+            <p>AAC Sustav</p>
+          `,
+          attachments: [
+            {
+              filename: `potvrda_${event.name.replace(/\s+/g, '_')}_${user.last_name}.pdf`,
+              content: pdfBuffer,
+              contentType: 'application/pdf'
+            }
+          ]
+        });
+
+        results.push({ user: user.email, status: 'sent' });
+      } catch (err) {
+        results.push({ user: user.email, status: 'failed', error: err.message });
+      }
+    }
+
+    res.json({ message: 'Potvrde poslane.', results });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 module.exports = router;

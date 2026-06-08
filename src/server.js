@@ -22,6 +22,7 @@ app.use('/api/contents', contentRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/requests', requestRoutes);
 app.use('/api/users', userRoutes);
+require('dotenv').config();
 
 console.log("MONGODB_URI:", process.env.MONGODB_URI);
 

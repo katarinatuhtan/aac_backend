@@ -4,7 +4,9 @@ const bcrypt = require('bcryptjs');
 const userSchema = new mongoose.Schema({
   username: {
     type: String,
-    trim: true
+    trim: true,
+    unique: true,
+    minlength: 3
   },
   name: {
     type: String,
@@ -22,7 +24,8 @@ const userSchema = new mongoose.Schema({
   },
   organization: {
     type: String,
-    trim: true
+    trim: true,
+    enum: ['UNIRI','APURI', 'EFRI', 'FABRI', 'FDMRI', 'FIDIT', 'FIZRI', 'FMRI', 'FZSRI', 'FFRI', 'GRADRI', 'MEDRI','PFRI', 'PRAVRI', 'RITEH', 'UFRI'], 
   },
   role: {
     type: String,

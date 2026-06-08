@@ -49,6 +49,16 @@ router.get('/', async (req, res) => {
     }
 });
 
+// CHECK USERNAME
+router.get('/check-username/:username', async (req, res) => {
+    try {
+      const user = await User.findOne({ username: req.params.username });
+      res.json({ taken: !!user });
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
 // READ ONE
 router.get('/:id', async (req, res) => {
     try {

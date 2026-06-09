@@ -10,23 +10,13 @@ const contentSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    status: {
-        type: String,
-        required: true,
-        enum: ['u_obradi', 'odobren', 'odbijen'],
-        default: 'u_obradi'
-    },
     author: {
         type: String,
         required: true,
     },
-    request_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Request',
-        required: true,
-    },
     url: {
         type: String,
+        required: true,
     },
 }, {
     timestamps: true

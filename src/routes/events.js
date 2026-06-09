@@ -64,28 +64,27 @@ router.delete('/:id', async (req, res) => {
 // REGISTER
 router.post('/:id/register', async (req, res) => {
     try {
-        const event = await Event.findById(req.params.id);
-        if (!event) return res.status(404).json({ message: 'Event not found' });
-
-        const { _id, name, last_name, email } = req.body;
-
-        const alreadyRegistered = event.registeredUsers.some(u => u._id === _id);
-        if (alreadyRegistered) {
-            return res.status(400).json({ message: 'User already registered' });
-        }
-
-        if (event.registeredUsers.length >= event.capacity) {
-            return res.status(400).json({ message: 'Event is full' });
-        }
-
-        event.registeredUsers.push({ _id, name, last_name, email });
-        await event.save();
-
-        res.json(event);
+      const event = await Event.findById(req.params.id);
+      if (!event) return res.status(404).json({ message: 'Event not found' });
+  
+      const { _id, name, last_name, email, allergies } = req.body;
+  
+      const alreadyRegistered = event.registeredUsers.some(u => u._id === _id);
+      if (alreadyRegistered) {
+        return res.status(400).json({ message: 'User already registered' });
+      }
+  
+      if (event.registeredUsers.length >= event.capacity) {
+        return res.status(400).json({ message: 'Event is full' });
+      }
+  
+      event.registeredUsers.push({ _id, name, last_name, email, allergies: allergies || '' });
+      await event.save();
+      res.json(event);
     } catch (err) {
-        res.status(500).json({ message: err.message });
+      res.status(500).json({ message: err.message });
     }
-});
+  });
 
 // UNREGISTER
 router.delete('/:id/register/:userId', async (req, res) => {
@@ -147,6 +146,44 @@ router.post('/:id/confirm', async (req, res) => {
       await event.save();
   
       res.json({ message: 'Potvrde poslane.', results, event });
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ADD COLLABORATOR
+router.post('/:id/collaborators', async (req, res) => {
+    try {
+      const event = await Event.findById(req.params.id);
+      if (!event) return res.status(404).json({ message: 'Event not found' });
+  
+      const { _id, name, last_name } = req.body;
+  
+      const already = event.collaboratorsList.some(c => c._id === _id);
+      if (already) {
+        return res.status(400).json({ message: 'Collaborator already added' });
+      }
+  
+      event.collaboratorsList.push({ _id, name, last_name });
+      await event.save();
+      res.json(event);
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+  
+  // REMOVE COLLABORATOR
+  router.delete('/:id/collaborators/:userId', async (req, res) => {
+    try {
+      const event = await Event.findById(req.params.id);
+      if (!event) return res.status(404).json({ message: 'Event not found' });
+  
+      event.collaboratorsList = event.collaboratorsList.filter(
+        c => c._id !== req.params.userId
+      );
+  
+      await event.save();
+      res.json(event);
     } catch (err) {
       res.status(500).json({ message: err.message });
     }

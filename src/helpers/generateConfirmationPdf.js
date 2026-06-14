@@ -36,7 +36,7 @@ function generateConfirmationPdf(user, event) {
       .moveDown(0.8)
       .fontSize(18)
       .font(FONT_BOLD)
-      .text(`${user.name} ${user.last_name}`, { align: 'center' })
+      .text(`${user.title ? user.title + ' ' : ''}${user.name} ${user.last_name}`, { align: 'center' })
       .moveDown(0.8)
       .fontSize(13)
       .font(FONT_REGULAR)
